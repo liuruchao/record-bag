@@ -31,7 +31,7 @@ tnpm start
 ## 项目结构
 
 ```
-koa-weapp-demo
+record-bag
 ├── controllers      // 存放所有业务逻辑的目录，并输出 route map
 │   ├── login.js
 │   ├── message.js
