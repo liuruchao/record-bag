@@ -4,6 +4,10 @@ const debug = require('debug')('koa-weapp-demo');
 const response = require('./middlewares/response');
 const bodyParser = require('koa-bodyparser');
 const config = require('./config');
+const knex = require('./connect');
+
+// 在 ctx 中添加数据库引用
+app.context.knex = knex;
 
 // 使用响应处理中间件
 app.use(response);
