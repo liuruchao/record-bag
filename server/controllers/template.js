@@ -1,148 +1,93 @@
 var create_template = async (ctx, next) => {
-  if (ctx.request.header['x-wx-skey']) {
-    let skey = ctx.request.header['x-wx-skey'];
 
-    let body = ctx.request.body;
-    let fields = body.fields || '';
-
-    let users = await ctx.knex('cSessionInfo').where({
-      skey: skey
-    }).select('uuid');
-
-    if (users.length > 0) {
-      let uuid = users[0].uuid;
-      let time = +new Date();
-      let tid = await ctx.knex('t_template').insert({
-        uuid,
-        fields,
-        create_time: time,
-        last_visit_time: time
-      });
-      ctx.body = {
-        code: 0,
-        data: {
-          tid: tid[0],
-          uuid,
-          fields
-        }
-      }
-    }
+  let response = null;
+  if (!ctx.request.header['x-wx-skey']) {
+    response = {code: -1, error: 'need login'};
+  } else if (!ctx.request.body.fields) {
+    response = {code: -1, error: 'param fields illegal'};
   } else {
-    ctx.body = {
-      code: -2,
-      error: 'needLogin'
+    let skey = ctx.request.header['x-wx-skey'];
+    let fields = ctx.request.body.fields;
+    let users = await ctx.knex('cSessionInfo').where({skey});
+
+    if (users.length === 1) {
+      let uuid = users[0].uuid;
+      let create_time = +new Date();
+      let last_visit_time = create_time;
+      let template = {uuid, fields, create_time, last_visit_time};
+      let result = await ctx.knex('t_template').insert(template);
+      response = {code: 0, data: Object.assign({tid: result[0]}, template)}
+    } else {
+      response = {code: -1, error: `have no user with skey is ${skey}`};
     }
   }
+  ctx.body = response;
 };
 
 var delete_template = async (ctx, next) => {
-  if (ctx.request.header['x-wx-skey']) {
-    let skey = ctx.request.header['x-wx-skey'];
-
-    let body = ctx.request.body;
-    let tid = parseInt(body.tid) || -1;
-
-    let templates = await ctx.knex('t_template').where({
-      tid: tid
-    }).select();
-
-    if (templates.length > 0) {
-      let result = await ctx.knex('t_template').where({
-        tid: tid
-      }).del();
-      ctx.body = {
-        code: 0,
-        data: templates[0]
-      }
-    } else {
-      ctx.body = {
-        code: -1,
-        data: {
-          error: 'tid_error'
-        }
-      }
-    }
+  let response = null;
+  if (!ctx.request.header['x-wx-skey']) {
+    response = {code: -1, error: 'need login'};
+  } else if (!parseInt(ctx.request.body.tid)) {
+    response = {code: -1, data: {error: 'param tid illegal'}};
   } else {
-    ctx.body = {
-      code: -2,
-      data: {
-        error: 'need_login'
-      }
+    let tid = parseInt(ctx.request.body.tid);
+    let templates = await ctx.knex('t_template').where({tid});
+
+    if (templates.length === 1) {
+      await ctx.knex('t_template').where({tid}).del();
+      response = {code: 0, data: templates[0]}
+    } else {
+      response = {code: -1, data: {error: `have no template with tid is ${tid}`}};
     }
   }
+  ctx.body = response;
 };
 
 var update_template = async (ctx, next) => {
-  if (ctx.request.header['x-wx-skey']) {
-    let skey = ctx.request.header['x-wx-skey'];
+  let response = null;
+  if (!ctx.request.header['x-wx-skey']) {
+    response = {code: -1, error: 'need login'};
+  } else if (!parseInt(ctx.request.body.tid)) {
+    response = {code: -1, data: {error: 'param tid illegal'}};
+  } else if (!ctx.request.body.fields) {
+    response = {code: -1, error: 'param fields illegal'};
+  } else {
+    let tid = parseInt(ctx.request.body.tid);
+    let fields = ctx.request.body.fields;
+    let templates = await ctx.knex('t_template').where({tid});
 
-    let body = ctx.request.body;
-    let tid = parseInt(body.tid) || -1;
-    let fields = body.fields || '';
-
-    let templates = await ctx.knex('t_template').where({
-      tid: tid
-    }).select();
-
-    if (templates.length > 0) {
-      let result = await ctx.knex('t_template').where('tid', '=', tid).update({
-        fields,
-        last_visit_time: +new Date()
-      });
+    if (templates.length === 1) {
+      let last_visit_time = +new Date();
+      let new_tempalte = {fields, last_visit_time};
+      let result = await ctx.knex('t_template').where('tid', '=', tid).update(new_tempalte);
       if (result === 1) {
-        let templates = await ctx.knex('t_template').where({
-          tid: tid
-        }).select();
-        ctx.body = {
-          code: 0,
-          data: templates
-        }
+        response = {code: 0, data: Object.assign(templates[0], new_tempalte)}
       }
     } else {
-      ctx.body = {
-        code: -1,
-        data: {
-          error: 'tid_error'
-        }
-      }
-    }
-  } else {
-    ctx.body = {
-      code: -2,
-      data: {
-        error: 'need_login'
-      }
+      response = {code: -1, data: {error: `have no template with tid is ${tid}`}};
     }
   }
+  ctx.body = response;
 };
 
 var get_templates = async (ctx, next) => {
-  if (ctx.request.header['x-wx-skey']) {
-    let skey = ctx.request.header['x-wx-skey'];
-
-    let query = ctx.request.query;
-    let tid = parseInt(query.tid) || -1;
+  let response = null;
+  if (!ctx.request.header['x-wx-skey']) {
+    response = {code: -1, error: 'need login'};
+  } else {
+    let tid = parseInt(ctx.request.query.tid);
     let templates = [];
-    if (tid !== -1) {
-      templates = await ctx.knex('t_template').where({
-        tid: tid
-      }).select();
+
+    if (tid) {
+      templates = await ctx.knex('t_template').where({tid});
     } else {
       templates = await ctx.knex('t_template').select();
     }
 
-    ctx.body = {
-      code: 0,
-      data: templates
-    }
-  } else {
-    ctx.body = {
-      code: -2,
-      data: {
-        error: 'need_login'
-      }
-    }
+    response = {code: 0, data: templates}
   }
+  ctx.body = response;
 };
 
 module.exports = {

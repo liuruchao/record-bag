@@ -19,5 +19,9 @@ app.use(bodyParser());
 const routes = require('./routes');
 app.use(routes());
 
+app.on('error', (err, ctx) => {
+  log.error('server error', err, ctx)
+});
+
 // 启动程序，监听端口
 app.listen(config.port, () => debug(`listening on port ${config.port}`));
