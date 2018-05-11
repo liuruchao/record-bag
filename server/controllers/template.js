@@ -1,5 +1,4 @@
 var create_template = async (ctx, next) => {
-
   let response = null;
   if (!ctx.request.header['x-wx-skey']) {
     response = {code: -1, error: 'need login'};
