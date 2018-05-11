@@ -74,10 +74,10 @@ VALUES
 UNLOCK TABLES;
 
 
-# Dump of table t_recode
+# Dump of table t_record
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `t_recode`;
+DROP TABLE IF EXISTS `t_record`;
 
 CREATE TABLE `t_recode` (
   `rid` bigint(11) NOT NULL AUTO_INCREMENT,
