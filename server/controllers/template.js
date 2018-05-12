@@ -2,10 +2,13 @@ var create_template = async (ctx, next) => {
   let response = null;
   if (!ctx.request.header['x-wx-skey']) {
     response = {code: -1, error: 'need login'};
+  } else if (!ctx.request.body.tname) {
+    response = {code: -1, error: 'need tname'};
   } else if (!ctx.request.body.fields) {
-    response = {code: -1, error: 'param fields illegal'};
+    response = {code: -1, error: 'need fields'};
   } else {
     let skey = ctx.request.header['x-wx-skey'];
+    let tname = ctx.request.body.tname;
     let fields = ctx.request.body.fields;
     let users = await ctx.knex('cSessionInfo').where({skey});
 
@@ -13,7 +16,7 @@ var create_template = async (ctx, next) => {
       let uuid = users[0].uuid;
       let create_time = +new Date();
       let last_visit_time = create_time;
-      let template = {uuid, fields, create_time, last_visit_time};
+      let template = {tname, fields, uuid, create_time, last_visit_time};
       let result = await ctx.knex('t_template').insert(template);
       response = {code: 0, data: Object.assign({tid: result[0]}, template)}
     } else {

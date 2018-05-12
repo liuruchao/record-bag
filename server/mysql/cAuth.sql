@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.7.20)
 # Database: cAuth
-# Generation Time: 2018-05-01 08:44:51 +0000
+# Generation Time: 2018-05-12 05:44:51 +0000
 # ************************************************************
 
 
@@ -79,13 +79,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `t_record`;
 
-CREATE TABLE `t_recode` (
+CREATE TABLE `t_record` (
   `rid` bigint(11) NOT NULL AUTO_INCREMENT,
   `tid` bigint(11) NOT NULL,
   `uuid` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `detail` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `create_time` bigint(11)  NOT NULL DEFAULT 0,
-  `last_visit_time` bigint(11)  NOT NULL DEFAULT 0,
+  `create_time` bigint(11) NOT NULL DEFAULT '0',
+  `last_visit_time` bigint(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模块记录';
 
@@ -98,10 +98,11 @@ DROP TABLE IF EXISTS `t_template`;
 
 CREATE TABLE `t_template` (
   `tid` bigint(11) NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tname` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `fields` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `create_time` bigint(11)  NOT NULL DEFAULT 0,
-  `last_visit_time` bigint(11)  NOT NULL DEFAULT 0,
+  `uuid` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_time` bigint(11) NOT NULL DEFAULT '0',
+  `last_visit_time` bigint(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模块信息';
 
